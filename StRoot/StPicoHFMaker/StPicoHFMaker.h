@@ -62,7 +62,7 @@ class StPicoHFEvent;
 class StHFPair;
 class StHFTriplet;
 class StHFCuts;
-class StHFHists;
+//class StHFHists;
 
 class StPicoHFMaker : public StMaker 
 {

@@ -11,7 +11,7 @@
 #include "StPicoEvent/StPicoEvent.h"
 #include "StPicoEvent/StPicoTrack.h"
 #include "StPicoEvent/StPicoBTofPidTraits.h"
-#include "StPicoPrescales/StPicoPrescales.h"
+//#include "StPicoPrescales/StPicoPrescales.h"
 
 #include "StHFCuts.h"
 //#include "StHFHists.h"
@@ -274,7 +274,7 @@ void StPicoHFMaker::createTertiaryK0Shorts() {
       mPicoHFEvent->addHFTertiaryVertexPair(&candidateK0Short);
 
       // -- fill tertiary pair histograms
-      mHFHists->fillTertiaryPairHists(&candidateK0Short, kTRUE);
+      //mHFHists->fillTertiaryPairHists(&candidateK0Short, kTRUE);
     }
   }
 }
