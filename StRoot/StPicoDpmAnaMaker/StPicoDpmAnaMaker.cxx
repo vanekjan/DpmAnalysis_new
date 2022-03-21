@@ -29,6 +29,8 @@ int StPicoDpmAnaMaker::InitHF() {
 
   // EXAMPLE //  mOutList->Add(new TH1F(...));
   // EXAMPLE //  TH1F* hist = static_cast<TH1F*>(mOutList->Last());
+
+  //QA histograms and TOF matching histograms
   mOutList->Add(new TH1F("h_time_per_event","h_time_per_event", 2000., 0., 20.));
   mOutList->Add(new TH2F("h_piTOF","h_piTOF",100,0,10, 2, 0, 2));
   mOutList->Add(new TH2F("h_kTOF","h_kTOF",100,0,10, 2, 0, 2));
@@ -68,10 +70,8 @@ int StPicoDpmAnaMaker::InitHF() {
 
   mOutList->Add(new TH2F("h_dedx","h_dedx", 1000, 0, 10, 1000, 0, 10));
   mOutList->Add(new TH2F("h_OneOverBeta", "h_OneOverBeta", 1000, 0, 10, 1000, 0, 4));
- /* mOutList->Add(new TH2D("h_pidedx","h_pidedx", 500, 0, 10, 500, -10, 10);
-  mOutList->Add(new TH2D("h_kdedx","h_kdedx", 500, 0, 10, 500, -10, 10));
-  mOutList->Add(new TH2D("h_pdedx","h_pdedx", 500, 0, 10, 500, -10, 10));*/
- mOutFileBaseName = mOutFileBaseName.ReplaceAll(".root", "");
+
+  mOutFileBaseName = mOutFileBaseName.ReplaceAll(".root", "");
 
    mOutList->Add(new TH1F("h_mh1Cent", "EventsVsCentrality;cent;Counts", 10, -1.5, 8.5));
    mOutList->Add(new TH1F("h_mh1CentWg", "EventsVsCentrality;cent;Counts", 10, -1.5, 8.5));
@@ -81,26 +81,9 @@ int StPicoDpmAnaMaker::InitHF() {
    mOutList->Add(new TH2F("h_mh2CentVzWg", "CentralityVsVzWg;cent;Vz", 10, -1.5, 8.5, 200, -10, 10));
 
    mOutList->Add(new TH3F("h_mh3CentVxVyWg", "CentralityVsVxVyWg", 10, -1.5, 8.5, 200, -10, 10, 200, -10, 10));
-/* not needed for Run16
-   mOutList->Add(new TH1F("h_mh1Cent_run", "EventsVsCentrality;cent;Counts", 10, -1.5, 8.5));
-   mOutList->Add(new TH1F("h_mh1CentWg_run", "EventsVsCentrality;cent;Counts", 10, -1.5, 8.5));
-   mOutList->Add(new TH1F("h_mh1gRefmultCor_run", "gRefmultCor;gRefmult;Counts", 700, 0, 700));
-   mOutList->Add(new TH1F("h_mh1gRefmultCorWg_run", "gRefmultCorWg;gRefmultCorWg;Counts", 700, 0, 700));
-   mOutList->Add(new TH2F("h_mh2CentVz_run", "CentralityVsVz;cent;Vz", 10, -1.5, 8.5, 200, -10, 10));
-   mOutList->Add(new TH2F("h_mh2CentVzWg_run", "CentralityVsVzWg;cent;Vz", 10, -1.5, 8.5, 200, -10, 10));
-*/
-
-//-------MY HISTOGRAMS-----------------
 
 
-//  mOutList->Add(new TH1F("h_reweight_isNaN", "reweight_isNaN", 10, 0, 10));
-
-
-//-------------------------------------
-
-  //histoInit(mOutFileBaseName, true); //for createQA()
-
-//  cout<<"RefMult1"<<endl;
+  //load refmult table
   mRefmultCorrUtil->setVzForWeight(6, -6.0, 6.0);
   //comment what is not needed
   if(mHFCuts->getStream() == 0 )//physics stream
@@ -114,16 +97,14 @@ int StPicoDpmAnaMaker::InitHF() {
   }
   
   
-//  cout<<"RefMult2"<<endl;
 
-   // -------------- USER VARIABLES -------------------------
-/* orig. Kvapil
-  ntp_DMeson = new TNtuple("ntp","DMeson Tree","pi1_runId:pi1_eventId:pi1_phi:pi1_eta:pi1_pt:pi1_dca:pi1_dedx:pi1_nSigma:pi1_nHitFit:pi1_nHitdedx:pi1_TOFinvbeta:pi1_betaBase:pi2_runId:pi2_eventId:pi2_phi:pi2_eta:pi2_pt:pi2_dca:pi2_dedx:pi2_nSigma:pi2_nHitFit:pi2_nHitdedx:pi2_TOFinvbeta:pi2_betaBase:k_runId:k_eventId:k_phi:k_eta:k_pt:k_dca:k_dedx:k_nSigma:k_nHitFit:k_nHitdedx:k_TOFinvbeta:k_betaBase:dcaMax:flag:primVz:D_theta:D_decayL:D_phi:D_eta:D_pt:D_mass:D_dV0Max:centrality:refmult:refmultcorr:reweight");
-*/
-  //use TTree instead of TNtuple
+  //create TTree to store D+- candidates
   ntp_Dmeson = new TTree("ntp", "DMeson TTree"); //create TTree
 
+
 //---Set branches------------------------------------------------------------------------------
+  //commented branches were used for QA and in older versions of analysis
+  //commented in order to reduce output file size as much as possible 
   //Pion1
   //ntp_Dmeson->Branch("pi1_runId", &pi1_runId, "pi1_runId/I");            //Int_t pi1_runId
   //ntp_Dmeson->Branch("pi1_eventId", &pi1_eventId, "pi1_eventId/I");       //Int_t pi1_eventId
@@ -226,6 +207,9 @@ int StPicoDpmAnaMaker::MakeHF() {
   //     - createCandidates()
   //     - analyzeCandidates()
 //  cout<<"start"<<endl;
+  //create and analyze D+- candidates
+  // createCandidates() makes triplets of K and pi and checks that they pass cuts
+  //analyzeCandidates() saves relevant information about the triplets to TTree
   std::clock_t start1 = std::clock();//kvapil
   if (isMakerMode() == StPicoHFMaker::kWrite) {
     createCandidates();
@@ -241,7 +225,7 @@ int StPicoDpmAnaMaker::MakeHF() {
   }
 
 
-  //fill tof and tpc
+  //get all QA and TOF matching histograms from mOutList and create them
   TH2F *h_piTOF = static_cast<TH2F*>(mOutList->FindObject("h_piTOF"));
   TH2F *h_kTOF = static_cast<TH2F*>(mOutList->FindObject("h_kTOF"));
   TH2F *h_pTOF = static_cast<TH2F*>(mOutList->FindObject("h_pTOF"));
@@ -281,111 +265,96 @@ int StPicoDpmAnaMaker::MakeHF() {
   TH2F *h_dedx = static_cast<TH2F*>(mOutList->FindObject("h_dedx"));
   TH2F *h_OneOverBeta = static_cast<TH2F*>(mOutList->FindObject("h_OneOverBeta"));
 
-   TH1F *h_mh1Cent = static_cast<TH1F*>(mOutList->FindObject("h_mh1Cent"));
-   TH1F *h_mh1CentWg = static_cast<TH1F*>(mOutList->FindObject("h_mh1CentWg"));
-   TH1F *h_mh1gRefmultCor = static_cast<TH1F*>(mOutList->FindObject("h_mh1gRefmultCor"));
-   TH1F *h_mh1gRefmultCorWg = static_cast<TH1F*>(mOutList->FindObject("h_mh1gRefmultCorWg"));
-   TH2F *h_mh2CentVz = static_cast<TH2F*>(mOutList->FindObject("h_mh2CentVz"));
-   TH2F *h_mh2CentVzWg = static_cast<TH2F*>(mOutList->FindObject("h_mh2CentVzWg"));
+  TH1F *h_mh1Cent = static_cast<TH1F*>(mOutList->FindObject("h_mh1Cent"));
+  TH1F *h_mh1CentWg = static_cast<TH1F*>(mOutList->FindObject("h_mh1CentWg"));
+  TH1F *h_mh1gRefmultCor = static_cast<TH1F*>(mOutList->FindObject("h_mh1gRefmultCor"));
+  TH1F *h_mh1gRefmultCorWg = static_cast<TH1F*>(mOutList->FindObject("h_mh1gRefmultCorWg"));
+  TH2F *h_mh2CentVz = static_cast<TH2F*>(mOutList->FindObject("h_mh2CentVz"));
+  TH2F *h_mh2CentVzWg = static_cast<TH2F*>(mOutList->FindObject("h_mh2CentVzWg"));
 
-   TH3F *h_mh3CentVxVyWg = static_cast<TH3F*>(mOutList->FindObject("h_mh3CentVxVyWg"));
-/* not needed for Run16
-   TH1F *h_mh1Cent_run = static_cast<TH1F*>(mOutList->FindObject("h_mh1Cent_run"));
-   TH1F *h_mh1CentWg_run = static_cast<TH1F*>(mOutList->FindObject("h_mh1CentWg_run"));
-   TH1F *h_mh1gRefmultCor_run = static_cast<TH1F*>(mOutList->FindObject("h_mh1gRefmultCor_run"));
-   TH1F *h_mh1gRefmultCorWg_run = static_cast<TH1F*>(mOutList->FindObject("h_mh1gRefmultCorWg_run"));
-   TH2F *h_mh2CentVz_run = static_cast<TH2F*>(mOutList->FindObject("h_mh2CentVz_run"));
-   TH2F *h_mh2CentVzWg_run = static_cast<TH2F*>(mOutList->FindObject("h_mh2CentVzWg_run"));
-*/
+  TH3F *h_mh3CentVxVyWg = static_cast<TH3F*>(mOutList->FindObject("h_mh3CentVxVyWg"));
 
-//  TH1F *h_reweight_isNaN = static_cast<TH1F*>(mOutList->FindObject("h_reweight_isNaN"));
+  //primary vertex
+  StThreeVectorF pVtx = mPicoDst->event()->primaryVertex();
 
-    StThreeVectorF pVtx = mPicoDst->event()->primaryVertex();
+  //create refmultCor to get centrality
+  mRefmultCorrUtil->init(mPicoDst->event()->runId());
 
-//    cout<<"RefMultInit1"<<endl;
-      mRefmultCorrUtil->init(mPicoDst->event()->runId());
-//    cout<<"RefMultInit2"<<endl;
-      if (!mRefmultCorrUtil){
-         LOG_WARN << " No mGRefMultCorrUtil! Skip! " << endl;
-         return kStWarn;
-      }
-      if (mRefmultCorrUtil->isBadRun(mPicoDst->event()->runId())) return kStOK;
-//    cout<<"N1"<<endl;
-//      mRefmultCorrUtil->setVzForWeight(6, -6.0, 6.0);
-//      mRefmultCorrUtil->readScaleForWeight("StRoot/StRefMultCorr/macros/weight_grefmult_vpd30_vpd5_Run14_P16id.txt");
-//    cout<<"N2"<<endl;
-      mRefmultCorrUtil->initEvent(mPicoDst->event()->grefMult(), mPrimVtx.z(), mPicoDst->event()->ZDCx()) ;
-      int centrality = mRefmultCorrUtil->getCentralityBin9(); //deleted const
-      const double reweight = mRefmultCorrUtil->getWeight();
-      const double refmultCor = mRefmultCorrUtil->getRefMultCorr();
+  if (!mRefmultCorrUtil)
+  {
+    LOG_WARN << " No mGRefMultCorrUtil! Skip! " << endl;
+    return kStWarn;
+  }
 
-/*      if(std::isnan(reweight))
-      {
-          h_reweight_isNaN->Fill(1);
-          return kStOk;
-      }
-*/
-      h_mh1gRefmultCor->Fill(refmultCor);
-      h_mh1gRefmultCorWg->Fill(refmultCor, reweight);
-      h_mh1Cent->Fill(centrality);
-      h_mh1CentWg->Fill(centrality, reweight);
-      h_mh2CentVz->Fill(centrality, pVtx.z());
-      h_mh2CentVzWg->Fill(centrality, pVtx.z(), reweight);
+  if (mRefmultCorrUtil->isBadRun(mPicoDst->event()->runId())) return kStOK;
 
-      h_mh3CentVxVyWg->Fill(centrality, pVtx.x(), pVtx.y(), reweight);
+  mRefmultCorrUtil->initEvent(mPicoDst->event()->grefMult(), mPrimVtx.z(), mPicoDst->event()->ZDCx()) ;
+  int centrality = mRefmultCorrUtil->getCentralityBin9(); //deleted const
+  const double reweight = mRefmultCorrUtil->getWeight();
+  const double refmultCor = mRefmultCorrUtil->getRefMultCorr();
 
-/*not needed fro Run16
-    if((mPicoDst->event()->runId()) >= 15107008){
-      h_mh1gRefmultCor_run->Fill(refmultCor);
-      h_mh1gRefmultCorWg_run->Fill(refmultCor, reweight);
-      h_mh1Cent_run->Fill(centrality);
-      h_mh1CentWg_run->Fill(centrality, reweight);
-      h_mh2CentVz_run->Fill(centrality, pVtx.z());
-      h_mh2CentVzWg_run->Fill(centrality, pVtx.z(), reweight);
-    }
+  h_mh1gRefmultCor->Fill(refmultCor);
+  h_mh1gRefmultCorWg->Fill(refmultCor, reweight);
+  h_mh1Cent->Fill(centrality);
+  h_mh1CentWg->Fill(centrality, reweight);
 
-*/
+  h_mh2CentVz->Fill(centrality, pVtx.z());
+  h_mh2CentVzWg->Fill(centrality, pVtx.z(), reweight);
 
-    UInt_t nTracks = mPicoDst->numberOfTracks();
-    for (unsigned short iTrack = 0; iTrack < nTracks; ++iTrack){
-        StPicoTrack const* trk = mPicoDst->track(iTrack);
-        if (!trk) continue;
-        //StPhysicalHelixD helix = trk->helix(); //SL16d
-        StPhysicalHelixD helix = trk->helix(mPicoDst->event()->bField()); //SL16j, Vanek
-        StThreeVectorF momentum = trk->gMom(pVtx, mPicoDst->event()->bField()); //bFiled NOT in kilogauss - properly computed inside gMom(...) function in StPicoTrack
+  h_mh3CentVxVyWg->Fill(centrality, pVtx.x(), pVtx.y(), reweight);
 
-        //if (!(trk->nHitsFit()>=20)) continue;
-        //if (!(fabs(momentum.pseudoRapidity()) <= 1.0)) continue;
-        if(!(mHFCuts->hasGoodNHitsFitMinHist(trk))) continue;
-        if (!(mHFCuts->hasGoodEta(momentum))) continue;
 
-        if (mHFCuts->hasGoodTPCnSigmaPion(trk)){ //new, hasGoodTPCnSigmaPion defined in StPicoCutsBase
-            //float piBeta = mHFCuts->getTofBetaBase(trk); //SL16d
-            float piBeta = mHFCuts->getTofBetaBase(trk, mPicoDst->event()->bField()); //SL16j, Vanek
-            Int_t piTofAvailable = 0;
-            if(!isnan(piBeta) && piBeta > 0){
-               piTofAvailable = 1;
-               float tofPion = fabs(1. / piBeta - sqrt(1+M_PION_PLUS*M_PION_PLUS/(momentum.mag()*momentum.mag())));
-               h_piTOFbeta->Fill(trk->gPt(),tofPion);
-            }
-            h_piTOF->Fill(trk->gPt(),piTofAvailable);
-            if (mHFCuts->hasGoodNHitsFitMinHist(trk)) h_piTOF_20->Fill(trk->gPt(),piTofAvailable);   //see line 303
-            if (trk->isHFTTrack()) h_piTOF_HFT->Fill(trk->gPt(),piTofAvailable);
-            if ((trk->isHFTTrack()) && (mHFCuts->hasGoodNSigmaHist(trk, 1))) h_piTOF_HFT_1sig->Fill(trk->gPt(),piTofAvailable); //hasGoodNSigmaHist(trk, 1) => check nSigma fo pion
-            if ((trk->isHFTTrack()) && (mHFCuts->hasGoodNHitsFitMinHist(trk))) h_piTOF_HFT_20->Fill(trk->gPt(),piTofAvailable);
-            if ((trk->isHFTTrack()) && (mHFCuts->hasGoodNSigmaHist(trk, 1)) && (mHFCuts->hasGoodNHitsFitMinHist(trk))) h_piTOF_HFT_1sig_20->Fill(trk->gPt(),piTofAvailable); //hasGoodNSigmaHist(trk, 1) => check nSigma of pion
-            if (fabs(mHFCuts->hasGoodNSigmaHist(trk, 1))) h_piTOF_1sig->Fill(trk->gPt(),piTofAvailable); //hasGoodNSigmaHist(trk, 1) => check nSigma of pion
+  //loop over PicoDst tracks
+  UInt_t nTracks = mPicoDst->numberOfTracks();
+  for (unsigned short iTrack = 0; iTrack < nTracks; ++iTrack)
+  {
+      StPicoTrack const* trk = mPicoDst->track(iTrack);
+      if (!trk) continue;
+      
+      StPhysicalHelixD helix = trk->helix(mPicoDst->event()->bField()); //SL16j, Vanek
+      StThreeVectorF momentum = trk->gMom(pVtx, mPicoDst->event()->bField()); //bFiled NOT in kilogauss - properly computed inside gMom(...) function in StPicoTrack
+
+      //check nHits and eta of track
+      if(!(mHFCuts->hasGoodNHitsFitMinHist(trk))) continue;
+      if (!(mHFCuts->hasGoodEta(momentum))) continue;
+
+      //PID of pions for QA histograms and 
+      if (mHFCuts->hasGoodTPCnSigmaPion(trk))
+      { 
+          //calculate beta of track from its momentum
+          float piBeta = mHFCuts->getTofBetaBase(trk, mPicoDst->event()->bField()); //SL16j, Vanek
+
+          //get beta of track from TOF, if TOF information is available          
+          Int_t piTofAvailable = 0;
+          if(!isnan(piBeta) && piBeta > 0)
+          {
+             piTofAvailable = 1;
+             float tofPion = fabs(1. / piBeta - sqrt(1+M_PION_PLUS*M_PION_PLUS/(momentum.mag()*momentum.mag())));
+             h_piTOFbeta->Fill(trk->gPt(),tofPion);
+          }
+
+          //fill QA and TOF matching histograms
+          h_piTOF->Fill(trk->gPt(),piTofAvailable);
+          if (mHFCuts->hasGoodNHitsFitMinHist(trk)) h_piTOF_20->Fill(trk->gPt(),piTofAvailable);   //see line 303
+          if (trk->isHFTTrack()) h_piTOF_HFT->Fill(trk->gPt(),piTofAvailable);
+          if ((trk->isHFTTrack()) && (mHFCuts->hasGoodNSigmaHist(trk, 1))) h_piTOF_HFT_1sig->Fill(trk->gPt(),piTofAvailable); //hasGoodNSigmaHist(trk, 1) => check nSigma fo pion
+          if ((trk->isHFTTrack()) && (mHFCuts->hasGoodNHitsFitMinHist(trk))) h_piTOF_HFT_20->Fill(trk->gPt(),piTofAvailable);
+          if ((trk->isHFTTrack()) && (mHFCuts->hasGoodNSigmaHist(trk, 1)) && (mHFCuts->hasGoodNHitsFitMinHist(trk))) h_piTOF_HFT_1sig_20->Fill(trk->gPt(),piTofAvailable); //hasGoodNSigmaHist(trk, 1) => check nSigma of pion
+          if (fabs(mHFCuts->hasGoodNSigmaHist(trk, 1))) h_piTOF_1sig->Fill(trk->gPt(),piTofAvailable); //hasGoodNSigmaHist(trk, 1) => check nSigma of pion
         }
 
-        if (mHFCuts->hasGoodTPCnSigmaKaon(trk)){ //new, hasGoodTPCnSigmaKaon defined in StPicoCutsBase
+        if (mHFCuts->hasGoodTPCnSigmaKaon(trk))
+        { //new, hasGoodTPCnSigmaKaon defined in StPicoCutsBase
             //float kBeta = mHFCuts->getTofBetaBase(trk);  //SL16d
             float kBeta = mHFCuts->getTofBetaBase(trk, mPicoDst->event()->bField()); //SL16j, Vanek
             Int_t kTofAvailable = 0;
-            if(!isnan(kBeta) && kBeta > 0){
+            if(!isnan(kBeta) && kBeta > 0)
+            {
                  kTofAvailable = 1;
                  float tofKaon = fabs(1. / kBeta - sqrt(1+M_KAON_PLUS*M_KAON_PLUS/(momentum.mag()*momentum.mag())));
                  h_kTOFbeta->Fill(trk->gPt(),tofKaon);
             }
+
             h_kTOF->Fill(trk->gPt(),kTofAvailable);
             if (mHFCuts->hasGoodNHitsFitMinHist(trk)) h_kTOF_20->Fill(trk->gPt(),kTofAvailable);   //see line 303
             if (trk->isHFTTrack()) h_kTOF_HFT->Fill(trk->gPt(),kTofAvailable);
@@ -395,15 +364,19 @@ int StPicoDpmAnaMaker::MakeHF() {
             if (fabs(mHFCuts->hasGoodNSigmaHist(trk, 2))) h_kTOF_1sig->Fill(trk->gPt(),kTofAvailable); //hasGoodNSigmaHist(trk, 2) => check nSigma of kaon
         }
 
-        if (mHFCuts->hasGoodTPCnSigmaProton(trk)){ //new, hasGoodTPCnSigmaProton defined in StPicoCutsBase
+        //
+        if (mHFCuts->hasGoodTPCnSigmaProton(trk))
+        { //new, hasGoodTPCnSigmaProton defined in StPicoCutsBase
             //float pBeta = mHFCuts->getTofBetaBase(trk); //SL16d
             float pBeta = mHFCuts->getTofBetaBase(trk, mPicoDst->event()->bField()); //SL16j, Vanek
             Int_t pTofAvailable = 0;
-            if(!isnan(pBeta) && pBeta > 0){
+            if(!isnan(pBeta) && pBeta > 0)
+            {
                pTofAvailable = 1;
                float tofProton = fabs(1. / pBeta - sqrt(1+M_PROTON*M_PROTON/(momentum.mag()*momentum.mag())));
                h_pTOFbeta->Fill(trk->gPt(),tofProton);
             }
+
             h_pTOF->Fill(trk->gPt(),pTofAvailable);
             if (mHFCuts->hasGoodNHitsFitMinHist(trk)) h_pTOF_20->Fill(trk->gPt(),pTofAvailable);   //see line 303
             if (trk->isHFTTrack()) h_pTOF_HFT->Fill(trk->gPt(),pTofAvailable);
@@ -412,14 +385,7 @@ int StPicoDpmAnaMaker::MakeHF() {
             if ((trk->isHFTTrack()) && (mHFCuts->hasGoodNSigmaHist(trk, 3)) && (mHFCuts->hasGoodNHitsFitMinHist(trk))) h_pTOF_HFT_1sig_20->Fill(trk->gPt(),pTofAvailable); //hasGoodNSigmaHist(trk, 3) => check nSigma of proton
             if (fabs(mHFCuts->hasGoodNSigmaHist(trk, 3))) h_pTOF_1sig->Fill(trk->gPt(),pTofAvailable); //hasGoodNSigmaHist(trk, 3) => check nSigma of proton
 
-/* orig. Kvapil
-            if (trk->nHitsFit()>=20) h_pTOF_20->Fill(trk->gPt(),pTofAvailable); //see line 303
-            if (trk->isHFTTrack()) h_pTOF_HFT->Fill(trk->gPt(),pTofAvailable);
-            if ((trk->isHFTTrack()) && (fabs(trk->nSigmaProton())<1.0)) h_pTOF_HFT_1sig->Fill(trk->gPt(),pTofAvailable);
-            if ((trk->isHFTTrack()) && (trk->nHitsFit()>=20)) h_pTOF_HFT_20->Fill(trk->gPt(),pTofAvailable);
-            if ((trk->isHFTTrack()) && (fabs(trk->nSigmaProton())<1.0) && (trk->nHitsFit()>=20)) h_pTOF_HFT_1sig_20->Fill(trk->gPt(),pTofAvailable);
-            if (fabs(trk->nSigmaProton())<1.0) h_pTOF_1sig->Fill(trk->gPt(),pTofAvailable);
-*/
+
         }
 
         h_pinsigma->Fill(momentum.mag(),trk->nSigmaPion());
