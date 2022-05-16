@@ -121,25 +121,6 @@ class StPicoDpmAnaMaker : public StPicoHFMaker
   void setRefMutCorr(StRefMultCorr* gRefMultCorr) { mRefmultCorrUtil = gRefMultCorr; }
   StRefMultCorr* getRefMultCorr() { return mRefmultCorrUtil; }
 
- //  float getTofBeta(StPicoTrack const*,StThreeVectorF const& vtx) const;
-
-   void histoInit(TString fileBaseName,bool fillQaHists=true);
-   void addTpcDenom1(bool IsPion, bool IsKaon, bool IsProton, float pt, int centrality, float Eta, float Phi, float Vz);
-   void addHFTNumer1(bool IsPion, bool IsKaon, bool IsProton, float pt, int centrality, float Eta, float Phi, float Vz);
-   void addDcaPtCent(float dca, float dcaXy, float  dcaZ, bool IsPion, bool IsKaon, bool IsProton, float pt,  int centrality, float Eta, float Phi, float Vz);
-   int getEtaIndexDca(float Eta) ;
-   int getPhiIndexDca(float Phi) ;
-   int getVzIndexDca(float Vz) ;
-   int getEtaIndexRatio(float Eta) ;
-   int getPhiIndexRatio(float Phi) ;
-   int getVzIndexRatio(float Vz) ;
-   void addCent(const double refmultCor, int centrality, const double reweight, const float vz);
-   void closeFile();
-
- // virtual float getEta(int index){return m_EtaEdgeDca[index];};
-
-
- //  ClassDef(StPicoDpmAnaMaker, 1)
 
  protected:
   virtual bool isHadron(StPicoTrack const*, int pidFlag) const;
@@ -165,72 +146,10 @@ private:
    StRefMultCorr* mRefmultCorrUtil;
    int mRunNumber;
        
-TString mOutFileBaseName;
-
-  bool mFillQaHists;
-   TFile* mOutFile;
-
-   //Cuts----------------------------
-   static const int m_nParticles = 3;
-   //TString m_ParticleName[m_nParticles];
-
-   static const int m_nEtasDca = 5;
-  // float m_EtaEdgeDca[m_nEtasDca+1];
-   static const int m_nPhisDca = 11;
-   //static float m_PhiEdgeDca[m_nPhisDca + 1];
-
-   static const int m_nVzsDca = 4;
-   //static float m_VzEdgeDca[m_nVzsDca + 1];
-
-   static const int m_nCentsDca = 9;
-   //static float m_CentEdgeDca[m_nCentsDca + 1];
-
-   static const int m_nPtsDca = 19;
-  // static float m_PtEdgeDca[m_nPtsDca + 1];
-
-   static const int m_nEtasRatio = 10;
-  // static float m_EtaEdgeRatio[m_nEtasRatio + 1];
-
-   static const int m_nPhisRatio = 11;
-   //static float m_PhiEdgeRatio[m_nPhisRatio + 1];
-
-   static const int m_nVzsRatio = 6;
-   //static float m_VzEdgeRatio[m_nVzsRatio + 1];
-
-   static const int m_nCentsRatio = 10;
-  // static float m_CentEdgeRatio[m_nCentsRatio + 1];
-
-   static const int m_nPtsRatio = 36;
-  // static float m_PtEdgeRatio[m_nPtsRatio + 1];
-
-  static const int m_nDcasDca = 144;
- // static float m_DcaEdgeDca[m_nDcasDca + 1];
-   //-----------------------------------
-
-   TH1F* mh1Cent;
-   TH1F* mh1CentWg;
-   TH1F* mh1gRefmultCor;
-   TH1F* mh1gRefmultCorWg;
-   TH2F* mh2CentVz;
-   TH2F* mh2CentVzWg;
+  TString mOutFileBaseName;
 
 
-   //HFT ratio QA
-   TH2F* mh2Tpc1PtCent;
-   TH2F* mh2Tpc1PhiVz;
-   TH2F* mh2HFT1PtCent;
-   TH2F* mh2HFT1PhiVz;
-   TH2F* mh2Tpc1PtCentPartEtaVzPhi[m_nParticles][m_nEtasRatio][m_nVzsRatio][m_nPhisRatio];
-   TH2F* mh2HFT1PtCentPartEtaVzPhi[m_nParticles][m_nEtasRatio][m_nVzsRatio][m_nPhisRatio];
-
-   //HFT Dca
-   TH3F* mh3DcaXyZPtCentPartEtaVzPhi[m_nParticles][m_nEtasDca][m_nVzsDca][m_nCentsDca];
-
-   TH3F* mh3DcaPtCent;
-   TH3F* mh3DcaXyPtCent;
-   TH3F* mh3DcaZPtCent;
-
-//---Variables for TTree---------------------------
+   //---Variables for TTree---------------------------
 	//Pion1
 	Int_t pi1_runId, pi1_eventId;
 	Float_t pi1_phi, pi1_eta, pi1_pt, pi1_dca, pi1_dedx, pi1_nSigma;

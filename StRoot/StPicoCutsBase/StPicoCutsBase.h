@@ -267,11 +267,6 @@ private:
 inline void StPicoCutsBase::setBadRunListFileName(const char* fileName) { mBadRunListFileName = fileName; }
 inline void StPicoCutsBase::addTriggerId(unsigned int triggerId) {mVecTriggerIdList.push_back(triggerId);}
 
-/*
-inline void StPicoCutsBase::setCutVxVyErrMax(float f)         { mVxErrMax = f;
-                                                                mVyErrMax = f; }
-*/
-
 inline void StPicoCutsBase::setCutVzMax(float f)              { mVzMax            = f; }
 inline void StPicoCutsBase::setCutVzVpdVzMax(float f)         { mVzVpdVzMax       = f; }
 
@@ -336,15 +331,6 @@ inline bool StPicoCutsBase::hasGoodTPCnSigmaProton(StPicoTrack const *trk) const
 
 
 
-/*
-inline bool StPicoCutsBase::isTOFPion(StPicoTrack const *trk, float B)   const { float tofBeta = getTofBeta(trk);  //SL16d
-                                                                        return isTOFHadron(trk, tofBeta, StPicoCutsBase::kPion); }
-inline bool StPicoCutsBase::isTOFKaon(StPicoTrack const *trk, float B)   const { float tofBeta = getTofBeta(trk);  
-                                                                        return isTOFHadron(trk, tofBeta, StPicoCutsBase::kKaon); }
-inline bool StPicoCutsBase::isTOFProton(StPicoTrack const *trk, float B) const { float tofBeta = getTofBeta(trk);  
-                                                                        return isTOFHadron(trk, tofBeta, StPicoCutsBase::kProton); }
-*/
-
 inline bool StPicoCutsBase::isTOFPionB(StPicoTrack const *trk, float B)   const { float tofBeta = getTofBeta(trk, B);  //new argument for magnetic field "float B", SL16j, Vanek
                                                                         return isTOFHadron(trk, tofBeta, StPicoCutsBase::kPion); }
 inline bool StPicoCutsBase::isTOFKaonB(StPicoTrack const *trk, float B)   const { float tofBeta = getTofBeta(trk, B);  
@@ -356,14 +342,6 @@ inline bool StPicoCutsBase::isTOFPion(StPicoTrack const *trk,   float const & to
 inline bool StPicoCutsBase::isTOFKaon(StPicoTrack const *trk,   float const & tofBeta) const { return isTOFHadron(trk, tofBeta, StPicoCutsBase::kKaon); }
 inline bool StPicoCutsBase::isTOFProton(StPicoTrack const *trk, float const & tofBeta) const { return isTOFHadron(trk, tofBeta, StPicoCutsBase::kProton); }
 
-/*
-inline bool StPicoCutsBase::isHybridTOFPion(StPicoTrack const *trk)   const { float tofBeta = getTofBeta(trk);  //SL16d
-                                                                            return isHybridTOFHadron(trk, tofBeta, StPicoCutsBase::kPion); }
-inline bool StPicoCutsBase::isHybridTOFKaon(StPicoTrack const *trk)   const { float tofBeta = getTofBeta(trk);  
-                                                                              return isHybridTOFHadron(trk, tofBeta, StPicoCutsBase::kKaon); }
-inline bool StPicoCutsBase::isHybridTOFProton(StPicoTrack const *trk) const { float tofBeta = getTofBeta(trk);  
-                                                                              return isHybridTOFHadron(trk, tofBeta, StPicoCutsBase::kProton); }
-*/
 
 inline bool StPicoCutsBase::isHybridTOFPionB(StPicoTrack const *trk, float B)   const { float tofBeta = getTofBeta(trk, B);  //new argument for magnetic field "float B", SL16j, Vanek
                                                                             return isHybridTOFHadron(trk, tofBeta, StPicoCutsBase::kPion); }

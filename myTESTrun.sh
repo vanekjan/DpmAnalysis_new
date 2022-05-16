@@ -20,9 +20,10 @@ path=$( echo $path | sed 's|//|/|g' )
 echo executing submitPicoHFMaker.csh f0r picoList_test.list inside $path
 
 starver SL17d
+#pre-compile run macro to avoind compilation issues in scratch
 root -b -q compileRunMacroLocally.C
 
-#for list generated directly by sed
+#for list generated directly by sed ad the top of this macro
 csh starSubmit/submitPicoHFMaker.csh $path picoList_test.list
 
 #for pre-generated sublists
