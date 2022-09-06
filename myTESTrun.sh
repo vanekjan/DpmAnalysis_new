@@ -2,6 +2,8 @@
 
 #copylist - Run16 Au+Au @ 200  GeV: startLine 1, maxLine 583172 (picoList_all_new.list), maxLine 618698 (picoList_all_new_2020.list)
 
+#test
+
 #good HFT runs start at line 166378 (picoList_all_new.list), start at line 177194 (picoList_all_new_2020.list) - (RunId > 17062047)
 #choose any prediefined number of lines from picoList_all_new.list
 #sed -n '550001,550100 p' ./picoLists/picoList_all_new.list > picoList_test.list
